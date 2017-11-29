@@ -30,23 +30,26 @@ public class MainActivity extends AppCompatActivity {
 
 
     //Requesting run-time permissions
+    private boolean AUDIO_PERMISSION=false;
     private final int MY_PERMISSIONS_RECORD_AUDIO = 1;
 
-    private void requestAudioPermissions() {
+    protected void requestAudioPermissions() {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.RECORD_AUDIO)) {
 
-                //Give user option to still opt-in the permissions
+                //Give user option opt-in the permissions
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.RECORD_AUDIO},
                         MY_PERMISSIONS_RECORD_AUDIO);
 
+                if(!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.RECORD_AUDIO))
+                            AUDIO_PERMISSION=true;
+
             } else {
                 // Show user dialog to grant permission to record audio
+                AUDIO_PERMISSION=true;
                 Toast.makeText(this, "Permissions Granted to record audio", Toast.LENGTH_LONG).show();
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.RECORD_AUDIO},
-                        MY_PERMISSIONS_RECORD_AUDIO);
             }
     }
 
@@ -63,13 +66,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Intent svc=new Intent(getBaseContext(), RecordingService.class);
-                startService(svc);
-
-
-                finish(); //because I want to close the UI after service started
+                if(!AUDIO_PERMISSION) {
+                    requestAudioPermissions();
+                }
+                else {
+                    Intent svc = new Intent(getBaseContext(), RecordingService.class);
+                    startService(svc);
+                    finish(); //because I want to close the UI after service started
+                }
             }
         });
     }
 }
-
